@@ -1,0 +1,30 @@
+#pragma kernel CSMain
+#pragma kernel SetupMesh
+
+struct MeshProperties
+{
+    float4x4 mat;
+    float4 color;
+};
+
+RWStructuredBuffer<MeshProperties> _Properties;
+
+[numthreads(64, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float4x4 mat = _Properties[id.x].mat;
+    _Properties[id.x].mat = mat;
+}
+
+[numthreads(64,1,1)]
+void SetupMesh(uint3 id : SV_DispatchThreadID)
+{
+    int index = id.x;
+    float4x4 mat = _Properties[index].mat;
+    mat = float4x4(1, 0, 0, id.x,
+                   0, 1, 0, 0,
+                   0, 0, 1, 0,
+                   0, 0, 0, 1);
+    _Properties[index].color = float4(id.x/500.0,0, 0, 1);
+    _Properties[index].mat = mat;
+}
